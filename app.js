@@ -1,7 +1,6 @@
 const drugs = [
   { name: "Penicillin", className: "Penicillin", group: "natural-penicillin", family: "penicillin" },
-  { name: "Nafcillin/Oxacillin", className: "Penicillin", group: "anti-staph-penicillin", family: "penicillin" },
-  { name: "Dicloxacillin", className: "Penicillin", group: "anti-staph-penicillin", family: "penicillin" },
+  { name: "Nafcillin/Oxacillin/Dicloxacillin", className: "Penicillin", group: "anti-staph-penicillin", family: "penicillin" },
   { name: "Amoxicillin", className: "Penicillin", group: "amoxicillin-like", family: "penicillin", route: "po" },
   { name: "Ampicillin", className: "Penicillin", group: "ampicillin-like", family: "penicillin" },
   { name: "Piperacillin", className: "Penicillin", group: "piperacillin-like", family: "penicillin" },
@@ -40,9 +39,10 @@ const classOrder = [
 ];
 
 const aliases = new Map([
-  ["naf", "Nafcillin/Oxacillin"],
-  ["nafcillin", "Nafcillin/Oxacillin"],
-  ["oxacillin", "Nafcillin/Oxacillin"],
+  ["naf", "Nafcillin/Oxacillin/Dicloxacillin"],
+  ["nafcillin", "Nafcillin/Oxacillin/Dicloxacillin"],
+  ["oxacillin", "Nafcillin/Oxacillin/Dicloxacillin"],
+  ["dicloxacillin", "Nafcillin/Oxacillin/Dicloxacillin"],
   ["erta", "Ertapenem"],
   ["ertapenem", "Ertapenem"],
   ["imipenem", "Imipenem"],
@@ -50,24 +50,43 @@ const aliases = new Map([
   ["meropenem", "Meropenem"],
 ]);
 
+const avoidPairs = new Map([
+  ["Penicillin", ["Amoxicillin", "Ampicillin"]],
+  ["Amoxicillin", ["Penicillin", "Ampicillin", "Cefadroxil", "Cefprozil"]],
+  ["Ampicillin", ["Penicillin", "Amoxicillin", "Cephalexin", "Cefaclor"]],
+  ["Cefadroxil", ["Amoxicillin", "Cephalexin", "Cefprozil"]],
+  ["Cephalexin", ["Ampicillin", "Cefadroxil", "Cefaclor"]],
+  ["Cefaclor", ["Ampicillin", "Cephalexin"]],
+  ["Cefoxitin", ["Cefuroxime"]],
+  ["Cefprozil", ["Amoxicillin", "Cefadroxil"]],
+  ["Cefuroxime", ["Cefoxitin"]],
+  ["Cefdinir", ["Cefixime"]],
+  ["Cefixime", ["Cefdinir"]],
+  ["Cefotaxime", ["Cefpodoxime", "Ceftriaxone", "Cefepime"]],
+  ["Cefpodoxime", ["Cefotaxime", "Ceftriaxone", "Cefepime"]],
+  ["Ceftazidime", ["Cefiderocol", "Aztreonam"]],
+  ["Ceftriaxone", ["Cefotaxime", "Cefpodoxime", "Cefepime"]],
+  ["Cefepime", ["Cefotaxime", "Cefpodoxime", "Ceftriaxone"]],
+  ["Cefiderocol", ["Ceftazidime", "Aztreonam"]],
+  ["Aztreonam", ["Ceftazidime", "Cefiderocol"]],
+]);
+
 const cautionPairs = new Map([
-  ["Amoxicillin", ["Ampicillin", "Cephalexin", "Cefaclor"]],
-  ["Ampicillin", ["Amoxicillin", "Cefadroxil", "Cefprozil"]],
-  ["Cefadroxil", ["Ampicillin", "Cephalexin", "Cefaclor"]],
-  ["Cephalexin", ["Amoxicillin", "Cefadroxil", "Cefprozil"]],
-  ["Cefaclor", ["Amoxicillin", "Cefadroxil", "Cefprozil"]],
-  ["Cefprozil", ["Ampicillin", "Cephalexin", "Cefaclor"]],
-  ["Cefuroxime", ["Cefdinir", "Cefixime", "Cefotaxime", "Cefpodoxime", "Ceftriaxone", "Cefepime"]],
-  ["Cefdinir", ["Cefuroxime", "Cefixime", "Cefotaxime", "Cefpodoxime", "Ceftriaxone", "Cefepime"]],
-  ["Cefixime", ["Cefuroxime", "Cefdinir", "Cefotaxime", "Cefpodoxime", "Ceftriaxone", "Cefepime"]],
-  ["Cefotaxime", ["Cefuroxime", "Cefdinir", "Cefixime"]],
-  ["Cefpodoxime", ["Cefuroxime", "Cefdinir", "Cefixime"]],
-  ["Ceftriaxone", ["Cefuroxime", "Cefdinir", "Cefixime"]],
-  ["Cefepime", ["Cefuroxime", "Cefdinir", "Cefixime"]],
-  ["Ceftazidime", ["Ceftolozane"]],
-  ["Ceftolozane", ["Ceftazidime", "Aztreonam"]],
-  ["Ceftaroline", ["Cefiderocol"]],
-  ["Cefiderocol", ["Ceftaroline"]],
+  ["Penicillin", ["Nafcillin/Oxacillin/Dicloxacillin", "Piperacillin", "Cefadroxil", "Cephalexin", "Cefaclor", "Cefprozil"]],
+  ["Nafcillin/Oxacillin/Dicloxacillin", ["Penicillin", "Amoxicillin", "Ampicillin", "Piperacillin"]],
+  ["Amoxicillin", ["Nafcillin/Oxacillin/Dicloxacillin", "Piperacillin", "Cephalexin", "Cefaclor"]],
+  ["Ampicillin", ["Nafcillin/Oxacillin/Dicloxacillin", "Piperacillin", "Cefadroxil", "Cefprozil"]],
+  ["Piperacillin", ["Penicillin", "Nafcillin/Oxacillin/Dicloxacillin", "Amoxicillin", "Ampicillin"]],
+  ["Cefadroxil", ["Penicillin", "Ampicillin", "Cefaclor"]],
+  ["Cephalexin", ["Penicillin", "Amoxicillin", "Cefprozil"]],
+  ["Cefaclor", ["Penicillin", "Amoxicillin", "Cefadroxil", "Cefprozil"]],
+  ["Cefprozil", ["Penicillin", "Ampicillin", "Cephalexin", "Cefaclor"]],
+  ["Cefuroxime", ["Cefotaxime", "Cefpodoxime", "Ceftazidime", "Ceftriaxone", "Cefepime"]],
+  ["Cefotaxime", ["Cefuroxime", "Ceftazidime"]],
+  ["Cefpodoxime", ["Cefuroxime", "Ceftazidime"]],
+  ["Ceftazidime", ["Cefuroxime", "Cefotaxime", "Cefpodoxime", "Ceftriaxone", "Cefepime"]],
+  ["Ceftriaxone", ["Cefuroxime", "Ceftazidime"]],
+  ["Cefepime", ["Cefuroxime", "Ceftazidime"]],
 ]);
 
 const drugByKey = new Map(drugs.map((drug) => [keyFor(drug.name), drug]));
@@ -93,19 +112,11 @@ function getRelationship(allergy, candidate) {
     };
   }
 
-  if (allergy.className === "Penicillin" && candidate.className === "Penicillin") {
+  if (isAvoidPair(allergy.name, candidate.name)) {
     return {
       status: "avoid",
-      reason: "Same penicillin subclass",
-      detail: "Treat penicillin-to-penicillin comparisons as avoid unless reviewed through an allergy pathway.",
-    };
-  }
-
-  if (allergy.group === candidate.group && allergy.group !== "cefazolin-unique") {
-    return {
-      status: "avoid",
-      reason: "Identical or closely matched R1/R2 side chain",
-      detail: `${allergy.name} and ${candidate.name} share the ${readableGroup(allergy.group)} group.`,
+      reason: "Known cross-reaction or identical side chain",
+      detail: "Mapped as AVOID in the Northwestern chart.",
     };
   }
 
@@ -122,6 +133,14 @@ function getRelationship(allergy, candidate) {
     reason: "Dissimilar R1/R2 side chain",
     detail: "Cross-reactivity is least likely by side-chain comparison.",
   };
+}
+
+function isAvoidPair(firstName, secondName) {
+  return (
+    avoidPairs.get(firstName)?.includes(secondName) ||
+    avoidPairs.get(secondName)?.includes(firstName) ||
+    false
+  );
 }
 
 function isCautionPair(firstName, secondName) {
@@ -260,7 +279,6 @@ function hydrateOptions() {
   options.innerHTML = drugs.map((drug) => `<option value="${drug.name}"></option>`).join("");
 }
 
-document.querySelector("#allergyInput").value = "Amoxicillin";
 document.querySelector("#allergyInput").addEventListener("input", renderResult);
 document.querySelector("#targetInput").addEventListener("input", renderResult);
 
