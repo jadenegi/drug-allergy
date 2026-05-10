@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beta-Lactam Allergy Cross-Reactivity</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Beta-lactam cross-reactivity checker">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Beta-lactam allergy support</p>
+            <h1>Cross-reactivity checker</h1>
+          </div>
+        </header>
+
+        <section class="controls" aria-label="Search inputs">
+          <label class="field">
+            <span>Reported allergy</span>
+            <input id="allergyInput" list="drugOptions" autocomplete="off" placeholder="Amoxicillin" />
+          </label>
+
+          <label class="field">
+            <span>Targeted drug</span>
+            <input id="targetInput" list="drugOptions" autocomplete="off" placeholder="Optional, e.g. Cefazolin" />
+          </label>
+        </section>
+
+        <datalist id="drugOptions"></datalist>
+
+        <section id="resultPanel" class="result-panel" aria-live="polite"></section>
+
+        <footer class="source-footer">Northwestern Medicine chart reference, updated 5/2024</footer>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
